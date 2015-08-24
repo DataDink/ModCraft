@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <title>Modules</title>
+      <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.18.0.css">
+      <script src="../Source/ModCraft.js"></script>
+      <script src="../Source/DependencyResolver.js"></script>
+      <script src="../Source/bootstrap.js"></script>
+   </head>
+   <body>
+      <div id="qunit"></div>
+      <div id="qunit-fixture"></div>
+      <script src="http://code.jquery.com/qunit/qunit-1.18.0.js"></script>
+      <script>
+         var module1 = false;
+         var init1 = false;
+         var start1 = false;
+         ModCraft.register.module('mod1', function() {
+            module1 = true;
+            this.init = function() { init1 = true; }
+            this.start = function() { start1 = true; }
+         });
+
+         var module2 = false;
+         var init2 = false;
+         var start2 = false;
+         ModCraft.register.module('mod2', function() {
+            module2 = true;
+            this.init = function() { init2 = true; }
+            this.start = function() { start2 = true; }
+         });
+
+         ModCraft.start();
+
+         QUnit.test('Tests', function(ass) {
+            ass.ok(module1);
+            ass.ok(init1);
+            ass.ok(start1);
+            ass.ok(module2);
+            ass.ok(init2);
+            ass.ok(start2);
+         })
+      </script>
+   </body>
+</html>

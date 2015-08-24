@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <title>Services</title>
+      <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.18.0.css">
+      <script src="../Source/ModCraft.js"></script>
+      <script src="../Source/DependencyResolver.js"></script>
+      <script src="../Source/bootstrap.js"></script>
+   </head>
+   <body>
+      <div id="qunit"></div>
+      <div id="qunit-fixture"></div>
+      <script src="http://code.jquery.com/qunit/qunit-1.18.0.js"></script>
+      <script>
+         var service1 = [];
+         ModCraft.register.service('service1', function() {
+            service1.push(this);
+         });
+
+         var service2 = [];
+         ModCraft.register.service('service2', ['service1', function(service) {
+            this.service = service;
+            service2.push(this);
+         }]);
+
+         var resolves = [];
+         resolves.push(ModCraft.resolve('service2'));
+         resolves.push(ModCraft.resolve('service1'));
+         resolves.push(ModCraft.resolve('service2'));
+
+         QUnit.test('Tests', function(ass) {
+            ass.ok(service1.length === 1);
+            ass.ok(service2.length === 1);
+            ass.ok(resolves[0] === service2[0]);
+            ass.ok(resolves[1] === service1[0]);
+            ass.ok(resolves[2] === resolves[0]);
+            ass.ok(resolves[1].services = service1[0]);
+         });
+      </script>
+   </body>
+</html>

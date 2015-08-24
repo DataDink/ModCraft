@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <title>Lifetimes</title>
+      <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.18.0.css">
+      <script src="../Source/ModCraft.js"></script>
+      <script src="../Source/DependencyResolver.js"></script>
+      <script src="../Source/bootstrap.js"></script>
+   </head>
+   <body>
+      <div id="qunit"></div>
+      <div id="qunit-fixture"></div>
+      <script src="http://code.jquery.com/qunit/qunit-1.18.0.js"></script>
+      <script>
+         QUnit.test('Tests', function(ass) {
+            var resolver = new ModCraft.DependencyResolver();
+
+            resolver.register.singleton('singleton', function() {});
+            ass.ok(resolver.resolve('singleton') === resolver.resolve('singleton'));
+
+            resolver.register.contextual('contextual', function() {});
+            ass.ok(resolver.resolve('contextual') !== resolver.resolve('contextual'));
+
+            resolver.register.transient('transient', function() {});
+            ass.ok(resolver.resolve('transient') !== resolver.resolve('transient'));
+
+            resolver.register.transient('outer', ['singleton', 'contextual', 'transient', 'inner', function(s, c, t, i) {
+               this.singleton = s;
+               this.contextual = c;
+               this.transient = t;
+               this.inner = i;
+            }]);
+
+            resolver.register.transient('inner', ['singleton', 'contextual', 'transient', function(s, c, t) {
+               this.singleton = s;
+               this.contextual = c;
+               this.transient = t;
+            }]);
+
+            var first = resolver.resolve('outer');
+            var second = resolver.resolve('outer');
+            ass.ok(first.singleton === first.inner.singleton);
+            ass.ok(first.contextual === first.inner.contextual);
+            ass.ok(first.transient !== first.inner.transient);
+            ass.ok(first.singleton === second.singleton);
+            ass.ok(first.contextual !== second.contextual);
+            ass.ok(first.transient !== second.transient);
+            ass.ok(second.contextual === second.inner.contextual);
+            ass.ok(second.transient !== second.inner.transient);
+         });
+      </script>
+   </body>
+</html>

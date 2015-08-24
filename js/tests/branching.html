@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <title>Branching</title>
+      <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.18.0.css">
+      <script src="../Source/ModCraft.js"></script>
+      <script src="../Source/DependencyResolver.js"></script>
+      <script src="../Source/bootstrap.js"></script>
+   </head>
+   <body>
+      <div id="qunit"></div>
+      <div id="qunit-fixture"></div>
+      <script src="http://code.jquery.com/qunit/qunit-1.18.0.js"></script>
+      <script>
+         var outer = new ModCraft.DependencyResolver();
+         var instance = {};
+         outer.register.instance('instance', instance);
+         var singleton = [];
+         outer.register.singleton('singleton', function() { singleton.push(this); });
+         var contextual = [];
+         outer.register.contextual('contextual', function() { contextual.push(this); });
+         var transient = [];
+         outer.register.transient('transient', function() { transient.push(this); });
+         var postponed = [];
+         outer.register.singleton('postponed', function() { postponed.push(this); });
+
+         outer.resolve('singleton');
+         outer.resolve('contextual');
+         outer.resolve('transient');
+
+         var inner = outer.branch();
+         var after = [];
+         inner.register.singleton('after', function() { after.push(this); });
+         inner.resolve('singleton');
+         inner.resolve('contextual');
+         inner.resolve('transient');
+         inner.resolve('postponed');
+         inner.resolve('after');
+         outer.resolve('postponed');
+         var afterOut = outer.resolve('after');
+         var instInner = inner.resolve('instance');
+
+         QUnit.test('Tests', function(ass) {
+            ass.ok(instance === instInner);
+            ass.ok(singleton.length === 1);
+            ass.ok(contextual.length === 2);
+            ass.ok(transient.length === 2);
+            ass.ok(postponed.length === 2);
+            ass.ok(after.length === 1);
+            ass.ok(!afterOut);
+         });
+      </script>
+   </body>
+</html>
