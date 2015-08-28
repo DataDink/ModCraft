@@ -12,6 +12,7 @@
    function resolvename(base, key) return (#base == 0) and key or base .. '.' .. key; end
 
    function namespace(base, intercept)
+      base = tostring(base);
       return setmetatable({}, {
          path = base,
          __index = function(t, k)
@@ -25,10 +26,11 @@
             classes[name] = v;
          end,
          __eq = function(a, b)
-            if (type(a) ~= 'table' or type(b) ~= 'table') then return false; end
-            a = getmetatable(a); b = getmetatable(b);
-            if ((not a) or (not b)) then return false; end;
-            return a.path == b.path;
+            if (type(a) == 'table') then a = getmetatable(a); end
+            if (type(b) == 'table') then b = getmetatable(b); end
+            if (type(a) == 'table') then a = a.path; end
+            if (type(b) == 'table') then b = b.path; end
+            return a == b;
          end
       });
    end

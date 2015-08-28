@@ -4,6 +4,9 @@ dofile('../Source/ModCraft.lua');
 test('Namespaces', function(ass)
    ass.truthy(class, 'Root NS');
    ass.truthy(class.NS, 'Dynamic NS');
+   ass.truthy(getmetatable(class.NS).path == 'NS', 'NameSpace Path');
+   ass.truthy(class.NS == class.NS, 'NameSpace Equality');
+   ass.truthy(class.NS == 'NS', 'String Equality');
 
    local descriptor = {};
    class.NS.test = descriptor;
@@ -56,7 +59,5 @@ test('Namespaces', function(ass)
    instance = false;
    subinst:sub();
    ass.truthy(instance == subinst, 'Sub Invocation');
-
-   print(subinst.__name);
 
 end);
