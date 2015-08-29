@@ -3,7 +3,7 @@ The framework framework
 
 ____
 
-This is the core application framework extracted from Curvy.
+This is the core application framework extracted from [Curvy](https://github.com/DataDink/Curvy).
 It allows me to create modular frameworks and applications and provides basic IOC
 functionality.
 
@@ -12,6 +12,8 @@ initialized, and loaded by the framework. Everything else is up to the developer
 
 # Docs & Source
 ---------------
+ModCraft is available for multiple languages. Please select a language below to see documentation
+and source.
 
-[javascript](/js)
-[lua](/lua)
+* [javascript](/js)
+* [lua](/lua)
