@@ -11,6 +11,18 @@
 // Override a dependency: local service = container.resolve('name', {dependency: {}});
 // Also available: register.instance(names, object), register.contextual(names, constructor), register.transient(names, constructor);
 // Also available: (name, class), (name, {dependencies}, class), ({names}, {dependencies}, class), (name, {dependencies, class}), etc
+(function()
+   class. ModCraft.DependencyResolver = {
+      constructor = function(resolver)
+         var registry = {};
+
+         resolver.register = {
+            
+         };
+      end
+   }
+end)
+
 (function() {
 
    class.DependencyResolver = {
