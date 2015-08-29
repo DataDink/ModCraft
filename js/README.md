@@ -1,4 +1,4 @@
-# ModCraft
+# ModCraft.js
 The framework framework
 
 ____
@@ -61,20 +61,19 @@ are available.
 
 **Post-Startup Registration Methods**
 
-After the application has been started adding dependencies directly to ModCraft will no longer be available
-to your application. You must use methods off either the application instance or dependency scope.
+After the application has been started adding modules to your application is no longer available. You must use methods off either the application instance or dependency scope.
 
 You can access the application instance either as a dependency or via the return value of the ModCraft.start()
 function.
 
 ```javascript
 var app = ModCraft.start();
-app.register.singleton('dependency', function() {});
+app.register.dependency.singleton('dependency', function() {});
 
 // OR
 
 ModCraft.register.dependency('dependency', ['application', function(app) {
-  app.register.transient('dependency', function() {});
+  app.register.dependency.transient('dependency', function() {});
 }]);
 ```
 
@@ -117,3 +116,29 @@ You can pre-resolve dependencies prior to startup using one of the following sig
 
 You can resolve dependencies after startup with the .resolve() method located on the application instance
 or the dependency scope (see registration above).
+
+**Hosting Multiple Application Instances**
+
+ModCraft.start() is a shortcut for
+```javascript
+var application = new ModCraft.Application();
+application.start();
+```
+
+Each new ModCraft.Application branches off of the global dependency scope and becomes
+its own environment. If you need to host multiple application environments you
+can still add all of your common dependencies to the global registry, but should add
+dependencies and modules specific to your application to an instance of
+ModCraft.Application.
+
+An application instance can have modules and services added to it until the
+application.start() method is called. Adding modules and services to an application
+instance is similar to the global registry except that you will us the .register
+structure on the application instance.
+
+```javascript
+var application = new ModCraft.Application();
+application.register.module('my-module', function() {
+   // Other applications will not have this module registered...
+});
+```

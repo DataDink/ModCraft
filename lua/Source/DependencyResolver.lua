@@ -12,92 +12,148 @@
 // Also available: register.instance(names, object), register.contextual(names, constructor), register.transient(names, constructor);
 // Also available: (name, class), (name, {dependencies}, class), ({names}, {dependencies}, class), (name, {dependencies, class}), etc
 (function()
+   local readonly, createRegistration, strings, constructor, createContext, resolveName, resolveConstructor; -- helper declarations
+
    class. ModCraft.DependencyResolver = {
-      constructor = function(resolver)
+      constructor = function(self)
+         local resolveName, resolveConstructor;
+
+         var resolver = {};
          var registry = {};
 
-         resolver.register = {
-            
-         };
+         resolver.register = readonly({
+            instance = function(names, object)
+               local reg = createRegistration(false, names);
+               reg.singleton = true;
+               reg.instance = object;
+               table.insert(registry, reg);
+            end,
+            singleton = function(names, dependencies, class)
+               local reg = createRegistration(true, names, dependencies, class);
+               reg.singleton = true;
+               table.insert(registry, reg);
+            end,
+            contextual = function(names, dependencies, class)
+               local reg = createRegistration(true, names, dependencies, class);
+               reg.contextual = true;
+               table.insert(registry, reg);
+            end,
+            transient = function(names, dependencies, class)
+               local reg = createRegistration(true, names, dependencies, class);
+               table.insert(registry, reg);
+            end,
+         });
+
+         resolver.branch = function()
+            local child = new .ModCraft:DependencyResolver();
+            for _, reg in ipairs(registry) do
+               if (reg.instance ~= nil) then child.register.instance(reg.names, reg.instance); end
+               elseif (reg.singleton) then child.register.singleton(reg.names, reg.dependencies, reg.class); end
+               elseif (reg.contextual) then child.register.contextual(reg.names, reg.dependencies, reg.class); end
+               else child.register.transient(reg.names, reg.dependencies, reg.class); end
+            end
+            return child;
+         end
+
+         resolver.resolve = function(...)
+            local context = createContext(registry);
+            local name, overrides = select(1, ...);
+            if (type(name) == 'string') then return resolveName(name, context, overrides or {}); end
+
+            local class, overrides = select(1, ...);
+            local ctor = constructor(class);
+            if (ctor) then return resolveConstructor({}, ctor, context, overrides or {}); end
+
+            local dependencies, class, overrides = select(1, ...);
+            local ctor = constructor(class);
+            if (ctor) then return resolveConstructor(dependencies, ctor, context, overrides or {}); end
+
+            local group, overrides = select(1, ...);
+            local class = table.remove(group);
+            local ctor = constructor(class);
+            if (ctor) then return resolveConstructor(group, ctor, context, overrides or {});
+
+            error("Can't resolve requested signature");
+         end
+
+         readonly(resolver, self);
       end
    }
+
+   -- Fronts a table with a readonly proxy
+   function readonly(table, proxy)
+      proxy = proxy or {};
+      setmetatable(proxy, {
+         __index = function(t, k) return resolver[k]; end,
+         __newindex = function() error('This object should remain read-only') end,
+      });
+      return proxy;
+   end
+
+   -- Maintains information about a dependency
+   function createRegistration(require, names, dependencies, class)
+      local reg = {names = {}, dependencies = {}, constructor = false, singleton = false, contextual = false};
+
+      -- Names
+      reg.names = strings(names);
+      if (#reg.names == 0) then error('No name(s) specified'); end
+
+      -- Constructor
+      local ctor = constructor(dependencies);
+      if (ctor) then dependencies = {}; end
+      if (not ctor) then ctor = constructor(class); end
+      if (not ctor and type(dependencies) == 'table') then ctor = constructor(table.remove(dependencies)); end
+      if (not ctor and require) then error('Class not specified'); end
+
+      -- Dependencies
+      reg.dependencies = strings(dependencies);
+
+      return reg;
+   end
+
+   -- Ensures a collection of strings or empty collection
+   function strings(items)
+      items = (type(items) == 'table') and items or {items};
+      local filtered = {};
+      for _, v in ipairs(items) do
+         if (type(v) == 'string') then table.insert(filtered, v); end
+      end
+      return filtered;
+   end
+
+   -- Maintains referencial integrity between resolution contexts
+   function createContext(registry)
+      local context = {};
+      for _, reg in ipairs(registry) do
+         if (reg.singleton) then table.insert(context, reg);
+         else table.insert(context, {
+            names = reg.names,
+            dependencies = reg.dependencies,
+            constructor = reg.constructor,
+            singleton = reg.singleton,
+            contextual = reg.contextual
+         });
+      end
+      return context;
+   end
+
+   -- Identifies and extracts a class construction method or false
+   function constructor(class)
+      if (type(class) ~= 'table') then return false; end
+      if (type(class.__name) ~= 'string') then return false; end
+      local name = class.__name;
+      if (type(class.__namespace) ~= 'table') then return false; end
+      local namespace = tostring(class.__namespace);
+      if (string.sub(name, 1, #namespace) ~= namespace) then return false; end
+      name = string.sub(name, #namespace);
+
+   end
 end)
 
 (function() {
 
    class.DependencyResolver = {
       {
-      var resolver = this;
-      var registry = [];
-
-      Object.defineProperty(resolver, 'register', {configurable: false, enumerable: true, value: {}});
-      Object.defineProperty(resolver.register, 'instance', {configurable: false, enumerable: true, value:
-         function(names, object) {
-            var reg = new registration(names, [], function(){});
-            reg.singleton = true;
-            reg.instance = object;
-            registry.push(reg);
-         }
-      });
-      Object.defineProperty(resolver.register, 'singleton', {configurable: false, enumerable: true, value:
-         function(names, dependencies, constructor) {
-            var reg = new registration(names, dependencies, constructor);
-            reg.singleton = true;
-            registry.push(reg);
-         }
-      });
-      Object.defineProperty(resolver.register, 'contextual', {configurable: false, enumerable: true, value:
-         function(names, dependencies, constructor) {
-            var reg = new registration(names, dependencies, constructor);
-            reg.contextual = true;
-            registry.push(reg);
-         }
-      });
-      Object.defineProperty(resolver.register, 'transient', {configurable: false, enumerable: true, value:
-         function(names, dependencies, constructor) {
-            var reg = new registration(names, dependencies, constructor);
-            registry.push(reg);
-         }
-      });
-
-      Object.defineProperty(resolver, 'branch', {configurable: false, enumerable: true, value:
-         function() {
-            var child = new DependencyResolver();
-            for (var i = 0; i < registry.length; i++) {
-               var reg = registry[i];
-               if ('instance' in reg && reg.singleton) { child.register.instance(reg.names, reg.instance); }
-               else if (reg.singleton) { child.register.singleton(reg.names, reg.dependencies, reg.constructor); }
-               else if (reg.contextual) { child.register.contextual(reg.names, reg.dependencies, reg.constructor); }
-               else { child.register.transient(reg.names, reg.dependencies, reg.constructor); }
-            }
-            return child;
-         }
-      });
-
-      Object.defineProperty(resolver, 'resolve', {configurable: false, enumerable: true, value:
-         function(item, overrides) {
-            var context = registry.map(function(r) { return r.singleton ? r : copy(r); });
-            if (typeof(item) === 'string') { return resolveName(item, context, overrides || {}); }
-            var dependencies = (arguments[0] instanceof Array) ? arguments[0] : [];
-            var constructor = array(arguments).filter(function(a) { return typeof(a) === 'function'; })[0];
-            var overrides = arguments[arguments.length - 1];
-
-            overrides = !(overrides instanceof Array) && typeof(overrides) === 'object' ? overrides : {};
-            constructor = typeof(constructor) === 'function' ? constructor
-               : dependencies.filter(function(d) { return typeof(d) === 'function'; })[0];
-            if (!constructor) { throw "Can't Resolve"; }
-
-            var dependencies = dependencies.filter(function(d) { return typeof(d) === 'string'; });
-            return resolveConstructor(dependencies, constructor, context, overrides);
-         }
-      });
-
-      Object.defineProperty(resolver.resolve, 'all', {configurable: false, enumerable: true, value:
-         function(item) {
-            var resolves = resolver.resolve(item);
-            return (resolves instanceof Array) ? resolves : [resolves];
-         }
-      });
 
       function resolveName(name, context, overrides) {
          if (name in overrides) { return overrides[name]; }

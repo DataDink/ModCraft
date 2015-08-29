@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                // core
                'Source/ModCraft.js',
                'Source/DependencyResolver.js',
-               'Source/bootstrap.js',
+               'Source/Application.js',
             ],
             dest: 'Builds/modcraft.js'
          }

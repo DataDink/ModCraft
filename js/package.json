@@ -12,10 +12,10 @@
     "modular",
     "ioc",
     "injection",
-    "dependency",
+    "dependency"
   ],
   "author": "DataDink",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "grunt-cli": "^0.1.13",
     "grunt-contrib-concat": "^0.5.1",

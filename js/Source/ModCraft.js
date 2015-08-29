@@ -7,10 +7,5 @@
 *  License: MIT
 *************************************************************************/
 
-// create: var application = new ModCraft(new ModCraft.DependencyResolver());
-// register a service: application.register.singleton('name', ['dependencies', function() {}]);
-// resolve a service: application.resolve('name');
-var ModCraft = function(injector) {
-   Object.defineProperty(this, 'register', {configurable: false, enumerable: true, value: injector.register });
-   Object.defineProperty(this, 'resolve', {configurable: false, enumerable: true, value: injector.resolve });
-};
+// Simply a namespace
+var ModCraft = {};
