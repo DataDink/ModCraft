@@ -127,9 +127,9 @@ application.start();
 
 Each new ModCraft.Application branches off of the global dependency scope and becomes
 its own environment. If you need to host multiple application environments you
-can still add all of your common dependencies to the global registry, but should add
-dependencies and modules specific to your application to an instance of
-ModCraft.Application.
+can still add all of your common dependencies to the global registry prior to 
+instantiating a new application, but should add dependencies and modules specific 
+to your application after creating a new ModCraft.Application.
 
 An application instance can have modules and services added to it until the
 application.start() method is called. Adding modules and services to an application
@@ -142,3 +142,7 @@ application.register.module('my-module', function() {
    // Other applications will not have this module registered...
 });
 ```
+
+After the .start() method has been called on an application you can still register
+dependencies *(app.register.dependency, app.register.dependency.instance, etc...)*
+but can no longer register modules or services.
