@@ -4,22 +4,24 @@ dofile('../Source/ModCraft.lua');
 test('Namespaces', function(ass)
    ass.truthy(class, 'Root NS');
    ass.truthy(class.NS, 'Dynamic NS');
-   ass.truthy(getmetatable(class.NS).path == 'NS', 'NameSpace Path');
+   ass.truthy(tostring(class.NS) == 'NS', 'NameSpace Path');
    ass.truthy(class.NS == class.NS, 'NameSpace Equality');
    ass.truthy('NS' == tostring(class.NS), 'String Equality');
 
-   local descriptor = {};
+   local descriptor = {value = {}};
    class.NS.test = descriptor;
-   ass.truthy(descriptor == class.NS.test, 'Assignment Retrieval');
+   ass.truthy(descriptor.value == class.NS.test.value, 'Assignment Retrieval');
 
    class.Compound.NameSpace.test = descriptor;
-   ass.truthy(descriptor == class.Compound.NameSpace.test, 'Compound Assignment');
+   ass.truthy(descriptor.value == class.Compound.NameSpace.test.value, 'Compound Assignment');
 
    local constructor = function() end;
    class.NS.ctor = constructor;
    ass.truthy(class.NS.ctor.constructor == constructor, 'Constructor Assignment');
 
    ass.fails(function() new.x = {}; end, 'New Unassignable');
+   ass.fails(function() class.NS.test.value = 1; end, 'Class Read Only');
+   ass.truthy(class.NS.test.__name == 'NS.test', 'Class Name');
 end);
 
 test('Constructors', function(ass)
