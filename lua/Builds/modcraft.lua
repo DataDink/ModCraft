@@ -221,9 +221,18 @@ end)();
 
       -- Constructor
       reg.constructor = constructor(dependencies);
-      if (reg.constructor) then dependencies = {}; end
-      if (not reg.constructor) then reg.constructor = constructor(class); end
-      if (not reg.constructor and type(dependencies) == 'table') then reg.constructor = constructor(table.remove(dependencies)); end
+      if (reg.constructor) then
+         reg.class = dependencies;
+         dependencies = {};
+      end
+      if (not reg.constructor) then
+         reg.class = class;
+         reg.constructor = constructor(class);
+      end
+      if (not reg.constructor and type(dependencies) == 'table') then
+         reg.class = table.remove(dependencies);
+         reg.constructor = constructor(reg.class);
+      end
       if (not reg.constructor and require) then error('Class not specified'); end
 
       -- Dependencies
