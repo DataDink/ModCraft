@@ -1,0 +1,23 @@
+{
+  "name": "ModCraft.lua",
+  "version": "0.0.1",
+  "description": "A framework for frameworks",
+  "main": "builds/modcraft.lua",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lua",
+    "framework",
+    "modular",
+    "ioc",
+    "injection",
+    "dependency"
+  ],
+  "author": "DataDink",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-concat": "^0.5.1"
+  }
+}

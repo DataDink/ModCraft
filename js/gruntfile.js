@@ -2,7 +2,7 @@ module.exports = function(grunt) {
    grunt.initConfig({
       concat: {
          options: { separator: ';\r\n\r\n' },
-         curvy: {
+         modcraft: {
             src: [
                // core
                'Source/ModCraft.js',
