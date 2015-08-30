@@ -190,12 +190,12 @@ be given an array with each dependency that was registered.
 **Manual Resolution**
 
 You can pre-resolve dependencies prior to startup using one of the following signatures:
-* ModCraft.resolve('dependency-name'); // resolves the service by name
-* ModCraft.resolve('dependency-name', {overrideValue = 'test'}); // overrides a dependency for this resolution
-* ModCraft.resolve({'dependency1', 'dependency2'}, class.MyClass); // constructs an object with the given requirements
-* ModCraft.resolve({'dependency1', 'dependency2', class.MyClass}); // constructs an object with the given requirements
-* ModCraft.resolve({'dependency1', 'dependency2'}, class.MyClass, { dependency2 = 'test' }); // constructs an object and overrides a dependency
-* ModCraft.resolve({'dependency1', 'dependency2', class.MyClass}, { dependency1 = 'test' }); // constructs an object and overrides a dependency
+* ModCraft.resolve('dependency-name'); -- resolves the service by name
+* ModCraft.resolve('dependency-name', {overrideValue = 'test'}); -- overrides a dependency for this resolution
+* ModCraft.resolve({'dependency1', 'dependency2'}, class.MyClass); -- constructs an object with the given requirements
+* ModCraft.resolve({'dependency1', 'dependency2', class.MyClass}); -- constructs an object with the given requirements
+* ModCraft.resolve({'dependency1', 'dependency2'}, class.MyClass, { dependency2 = 'test' }); -- constructs an object and overrides a dependency
+* ModCraft.resolve({'dependency1', 'dependency2', class.MyClass}, { dependency1 = 'test' }); -- constructs an object and overrides a dependency
 
 You can resolve dependencies after startup with the .resolve() method located on the application instance
 or the dependency scope (see registration above).
