@@ -117,7 +117,9 @@
 
    function class:NameSpace() return createNS(); end -- Exposes custom namespace scoping
 end)();
-;
+
+
+--
 
 --------------------------------------------------------------------------
 --  DependencyResolver
@@ -308,7 +310,9 @@ end)();
       end
    end
 end)();
-;
+
+
+--
 
 --------------------------------------------------------------------------
 --  Application
