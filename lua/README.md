@@ -80,8 +80,8 @@ class .MyClass = {
 * Inheriting Another Classes
 
 Inheritance in this implementation is more like layering. Each constructor
-starting with the most base class will be called with the same arguments
-and static members will by copied and overwrite each other in the same manner
+starting with the most base class will be called with the same arguments.
+Static members will by copied and overwrite each other in the same manner
 
 ```lua
 function class :MyBase()
