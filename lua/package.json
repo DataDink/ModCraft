@@ -18,6 +18,7 @@
   "license": "MIT",
   "devDependencies": {
     "grunt-cli": "^0.1.13",
-    "grunt-contrib-concat": "^0.5.1"
+    "grunt-contrib-concat": "^0.5.1",
+    "luamin": "^0.2.8"
   }
 }
