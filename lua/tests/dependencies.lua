@@ -74,3 +74,46 @@ test('Dependencies', function(ass)
    local res = resolver.resolve('outer');
    ass.truthy(res.p.i.x == 'inner', 'Deps Filled');
 end);
+
+test('Lifetime', function(ass)
+   local resolver = new .ModCraft:DependencyResolver();
+
+   function class:singleTime() end;
+   resolver.register.singleton('singleton', class.singleTime);
+   ass.truthy(resolver.resolve('singleton') == resolver.resolve('singleton'), 'Singleton');
+
+   function class:ctxTime() end;
+   resolver.register.contextual('contextual', class.ctxTime);
+   local inner = false;
+   local outer = false;
+   function class:innerTime(d) inner = d; end;
+   function class:outerTime(d) outer = d; end;
+   resolver.register.transient('inner', {'contextual', class.innerTime});
+   resolver.register.transient('outer', {'contextual', 'inner', class.outerTime});
+   resolver.resolve('outer');
+   ass.truthy(inner == outer, 'Contextual');
+
+   function class:transTime() end;
+   resolver.register.transient('transient', class.transTime);
+   local inner2 = false;
+   local outer2 = false;
+   function class:innerTrans(d) inner2 = d; end
+   function class:outerTrans(d) outer2 = d; end
+   resolver.register.transient('inner2', {'transient', class.innerTrans});
+   resolver.register.transient('outer2', {'transient', 'inner2', class.outerTrans});
+   resolver.resolve('outer2');
+   ass.truthy(inner2 ~= outer2, 'Transient');
+end);
+
+test('Multiples', function(ass)
+   local resolver = new .ModCraft:DependencyResolver();
+
+   local instance = {};
+   function class:a() end;
+   resolver.register.instance('instance', instance);
+   resolver.register.instance('instance', instance);
+   local resolutions = resolver.resolve('instance');
+   ass.truthy(#resolutions == 2, 'Counted');
+   ass.truthy(resolutions[1] == resolutions[2], 'Matched');
+   ass.truthy(resolutions[1] == instance, 'Typed');
+end);
