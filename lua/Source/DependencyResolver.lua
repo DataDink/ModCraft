@@ -14,7 +14,7 @@
 (function()
    local createRegistration, readonly, strings, constructor, createContext, resolveName, resolveConstructor; -- helper declarations
 
-   class. ModCraft.DependencyResolver = {
+   class .ModCraft.DependencyResolver = {
       constructor = function(self)
          local resolver = {};
          local registry = {};
