@@ -35,6 +35,85 @@ ModCraft.start();
 
 # Documentation
 
+**Lua Classes**
+
+In order for ModCraft to work in lua there needs to be the concept of a class.
+ModCraft brings with it a simple implementation of this.
+
+ModCraft exposes two globals: "class" and "new". The class keyword
+is used for defining classes and the new keyword is used for constructing them.
+
+* Defining A Class
+
+*Also see Defining Static Members below for the long-form version of a class*
+```lua
+function class :MyClass(value)
+   self.instanceMethod = function()
+      print('I can see value:', value);
+   end
+end
+```
+
+* Instantiating A Class
+```lua
+-- assuming you've previously defined MyClass
+local instance = new :MyClass('test');
+```
+
+* Defining Static Members
+
+You can also define static members on a class that will be given/shared
+to instances of that class.
+```lua
+class .MyClass = {
+   -- The constructor is a special member that will not be added to instances
+   -- Specifying a constructor is optional
+   constructor = function(self, value) print(value); end,
+
+   -- This function will be shared between all instances of this class
+   staticMethod = function()
+      print("I don't have access to value because I'm static(ish)");
+   end
+}
+```
+
+* Inheriting Another Classes
+
+Inheritance in this implementation is more like layering. Each constructor
+starting with the most base class will be called with the same arguments
+and static members will by copied and overwrite each other in the same manner
+
+```lua
+function class :MyBase()
+   print('my instance:', self);
+end
+
+class .MyClass = {
+   -- The inherits member, like constructor, will not be added to instances
+   inherits = class.MyBase,
+
+   constructor = function(self)
+      print('my instance:', self);
+   end
+}
+```
+
+* Namespacing Classes
+
+You can also add a namespace to your class names like so:
+```lua
+class .ParentNamespace.ChildNamespace.MyClass = {};
+
+-- OR
+
+function class .ParentNamespace.ChildNamespace:MyClass() end;
+```
+
+These are accessed by the 'new' global in the same way
+```lua
+new .ParentNamespace.ChildNamespace:MyClass();
+```
+
 **Dependencies**
 
 There are four types of dependencies:
@@ -68,38 +147,40 @@ You can access the application instance either as a dependency or via the return
 function.
 
 ```lua
-var app = ModCraft.start();
-class.service = {};
+local app = ModCraft.start();
+function class:service() end;
 app.register.dependency.singleton('dependency', class.service);
 
-// OR
-
-ModCraft.register.dependency('dependency', ['application', function(app) {
-  app.register.dependency.transient('dependency', function() {});
-}]);
+-- OR
+function class:dependency(app)
+   app.register.dependency.instance('something-else', {});
+end
+ModCraft.register.dependency('dependency', {'application', class.dependency});
 ```
 
-You can also access the dependency scope for the application directly as by requesting it as a dependency
-```javascript
-ModCraft.register.service('service', ['dependencies', function(scope) {
-  var manualResolution = scope.resolve('some-other-service');
-}]);
+You can also access the dependency scope for the application directly as by requesting it as a dependency named "dependencies".
+```lua
+function class:MyService(scope)
+   local manualResolve = scope.resolve('some-other-service');
+end
+ModCraft.register.service('service', {'dependencies', class.MyService});
 ```
+
 **Registration Method Signatures**
 
 When using any of the registration methods you have a variety of signatures available
 
 When registering an instance you can specify one or more names along with the object:
 * ('name', {})
-* (['name1', 'name2'], {})
+* ({'name1', 'name2'}, {})
 
 When registering anything else you can use any one of the following signatures:
-* ('name', function() {})
-* ('name', ['dependency'], function(dependency) {})
-* ('name', ['dependency', function(dependency) {}])
-* (['name1', 'name2'], function() {})
-* (['name1', 'name2'], ['dependency'], function(dependency) {})
-* (['name1', 'name2'], ['dependency', function(dependency) {}])
+* ('name', class.MyClass)
+* ('name', {'dependency'}, class.MyClass)
+* ('name', {'dependency', class.MyClass})
+* ({'name1', 'name2'}, class.MyClass)
+* ({'name1', 'name2'}, {'dependency'}, class.MyClass)
+* ({'name1', 'name2'}, {'dependency', class.MyClass})
 
 **Registering The Same Name**
 
@@ -110,11 +191,11 @@ be given an array with each dependency that was registered.
 
 You can pre-resolve dependencies prior to startup using one of the following signatures:
 * ModCraft.resolve('dependency-name'); // resolves the service by name
-* ModCraft.resolve('dependency-name', {overrideValue: 'test'}); // overrides a dependency for this resolution
-* ModCraft.resolve(['dependency1', 'dependency2'], function(dep1, dep2) {}); // constructs an object with the given requirements
-* ModCraft.resolve(['dependency1', 'dependency2', function(dep1, dep2) {}]); // constructs an object with the given requirements
-* ModCraft.resolve(['dependency1', 'dependency2'], function(dep1, dep2) {}, { dependency2: 'test' }); // constructs an object and overrides a dependency
-* ModCraft.resolve(['dependency1', 'dependency2', function(dep1, dep2) {}, { dependency1: 'test' }); // constructs an object and overrides a dependency
+* ModCraft.resolve('dependency-name', {overrideValue = 'test'}); // overrides a dependency for this resolution
+* ModCraft.resolve({'dependency1', 'dependency2'}, class.MyClass); // constructs an object with the given requirements
+* ModCraft.resolve({'dependency1', 'dependency2', class.MyClass}); // constructs an object with the given requirements
+* ModCraft.resolve({'dependency1', 'dependency2'}, class.MyClass, { dependency2 = 'test' }); // constructs an object and overrides a dependency
+* ModCraft.resolve({'dependency1', 'dependency2', class.MyClass}, { dependency1 = 'test' }); // constructs an object and overrides a dependency
 
 You can resolve dependencies after startup with the .resolve() method located on the application instance
 or the dependency scope (see registration above).
@@ -122,8 +203,8 @@ or the dependency scope (see registration above).
 **Hosting Multiple Application Instances**
 
 ModCraft.start() is a shortcut for
-```javascript
-var application = new ModCraft.Application();
+```lua
+local application = new .ModCraft:Application();
 application.start();
 ```
 
@@ -138,11 +219,9 @@ application.start() method is called. Adding modules and services to an applicat
 instance is similar to the global registry except that you will us the .register
 structure on the application instance.
 
-```javascript
-var application = new ModCraft.Application();
-application.register.module('my-module', function() {
-   // Other applications will not have this module registered...
-});
+```lua
+local application = new .ModCraft:Application();
+application.register.module('my-module', class.MyClass);
 ```
 
 After the .start() method has been called on an application you can still register
