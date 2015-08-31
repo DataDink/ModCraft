@@ -37,6 +37,8 @@ ModCraft.start();
 
 **Lua Classes**
 
+*note: static members do not work with the version of lua ComputerCraft is built on*
+
 In order for ModCraft to work in lua there needs to be the concept of a class.
 ModCraft brings with it a simple implementation of this.
 
